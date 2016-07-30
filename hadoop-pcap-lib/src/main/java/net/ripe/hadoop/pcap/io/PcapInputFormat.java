@@ -34,12 +34,15 @@ public class PcapInputFormat extends FileInputFormat<LongWritable, ObjectWritabl
         FileSplit fileSplit = (FileSplit)split;
         Path path = fileSplit.getPath();
         LOG.info("Reading PCAP: " + path.toString());
-        long start = 0L;
-        long length = fileSplit.getLength();
-        return initPcapRecordReader(path, start, length, context);
+
+//        long start = 0L;
+//        long length = fileSplit.getLength();
+        long start = fileSplit.getStart();
+        long end = start + fileSplit.getLength() - 1;
+        return initPcapRecordReader(path, start, end, context);
     }
 
-    public static PcapRecordReader initPcapRecordReader(Path path, long start, long length, TaskAttemptContext context) throws IOException {
+    public static PcapRecordReader initPcapRecordReader(Path path, long start, long end, TaskAttemptContext context) throws IOException {
         Configuration conf = context.getConfiguration();
         FileSystem fs = path.getFileSystem(conf);
         FSDataInputStream baseStream = fs.open(path);
@@ -50,7 +53,7 @@ public class PcapInputFormat extends FileInputFormat<LongWritable, ObjectWritabl
             stream = new DataInputStream(codec.createInputStream(stream));
 
         PcapReader reader = initPcapReader(stream, conf);
-        return new PcapRecordReader(reader, start, length, baseStream, stream, context);
+        return new PcapRecordReader(reader, start, end, baseStream, stream, context);
     }
 
     public static PcapReader initPcapReader(DataInputStream stream, Configuration conf) {

@@ -186,6 +186,10 @@ public class PcapReader implements Iterable<Packet> {
 		if (!readBytes(packetData))
 			return packet;
 
+		// from here on, a truncated packet could cause an ArrayIndexOutOfBounds exception on the convert calls.
+		// rather than many checks for remaining bytes, just return the incomplete packet on exception.
+		try {
+		
 		int ipStart = findIPStart(packetData);
 		if (ipStart == -1)
 			return packet;
@@ -289,7 +293,11 @@ public class PcapReader implements Iterable<Packet> {
 			packet.put(Packet.LEN, packetPayload.length);
 			processPacketPayload(packet, packetPayload);
 		}
-
+		}
+		catch (ArrayIndexOutOfBoundsException e) {
+			// drop down to return (incomplete) packet
+		}
+		
 		return packet;
 	}
 
