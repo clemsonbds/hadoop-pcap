@@ -121,6 +121,14 @@ public class PcapReader implements Iterable<Packet> {
 		linkType = lt;
 	}
 
+	public long getSnaplen() {
+		return snapLen;
+	}
+	
+	public boolean isReverseHeaderByteOrder() {
+		return reverseHeaderByteOrder;
+	}
+
 	private int getUdpChecksum(byte[] packetData, int ipStart, int ipHeaderLen) {
 		/*
 		 * No Checksum on this packet?

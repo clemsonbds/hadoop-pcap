@@ -48,7 +48,11 @@ public class PcapRecordReader extends RecordReader<LongWritable, ObjectWritable>
 
     @Override
     public boolean nextKeyValue() throws IOException {
-        if (!pcapReaderIterator.hasNext())
+    	// Read inclusive of the end byte.
+    	if (getPos() > end)
+    		return false;
+
+    	if (!pcapReaderIterator.hasNext())
             return false;
 
         key.set(++packetCount);
