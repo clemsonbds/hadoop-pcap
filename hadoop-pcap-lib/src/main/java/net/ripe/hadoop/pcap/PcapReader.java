@@ -531,15 +531,15 @@ public class PcapReader implements Iterable<Packet> {
 			return new byte[0];
 		}
 		if (payloadDataStart > packetData.length) {
-			LOG.warn("Payload start (" + payloadDataStart + ") is larger than packet data (" + packetData.length + "). Returning empty payload.");
+//			LOG.warn("Payload start (" + payloadDataStart + ") is larger than packet data (" + packetData.length + "). Returning empty payload.");
 			return new byte[0];
 		}
 		if (payloadDataStart + payloadLength > packetData.length) {
 			if (payloadDataStart + payloadLength <= snapLen) // Only corrupted if it was not because of a reduced snap length
-				LOG.warn("Payload length field value (" + payloadLength + ") is larger than available packet data (" 
+/*				LOG.warn("Payload length field value (" + payloadLength + ") is larger than available packet data (" 
 						+ (packetData.length - payloadDataStart) 
 						+ "). Packet may be corrupted. Returning only available data.");
-			payloadLength = packetData.length - payloadDataStart;
+*/			payloadLength = packetData.length - payloadDataStart;
 		}
 		byte[] data = new byte[payloadLength];
 		System.arraycopy(packetData, payloadDataStart, data, 0, payloadLength);

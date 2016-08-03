@@ -18,7 +18,8 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
 import net.ripe.hadoop.pcap.io.PcapInputFormat;
-import net.ripe.hadoop.pcap.io.SplitablePcapInputFormat;
+import net.ripe.hadoop.pcap.io.SplitLocalPcapInputFormat;
+import net.ripe.hadoop.pcap.io.SplitGlobalPcapInputFormat;
 
 //import net.ripe.hadoop.pcap.io.PcapInputFormat;
 
@@ -57,7 +58,7 @@ public class SplitCountPackets extends Configured implements Tool {
 	@Override
 	public int run(String[] args) throws Exception {
 		Job job = Job.getInstance(this.getConf(), "packet count");
-		job.setInputFormatClass(SplitablePcapInputFormat.class);
+		job.setInputFormatClass(SplitGlobalPcapInputFormat.class);
 		job.setJarByClass(SplitCountPackets.class);
 		job.setMapperClass(PacketCountMapper.class);
 		job.setCombinerClass(PacketCountReducer.class);

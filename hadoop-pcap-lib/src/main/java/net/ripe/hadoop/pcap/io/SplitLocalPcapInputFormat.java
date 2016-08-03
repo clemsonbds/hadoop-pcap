@@ -23,12 +23,14 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
-import block.BoundaryDetector;
 import net.ripe.hadoop.pcap.PcapReader;
 import net.ripe.hadoop.pcap.io.reader.PcapRecordReader;
-import pcap.PcapBoundaryDetector;
 
-public class SplitablePcapInputFormat extends FileInputFormat<LongWritable, ObjectWritable> {
+import boundary.RecordBoundaryDetector;
+import boundary.RecordFormat;
+import boundary.pcap.PcapRecordFormat;
+
+public class SplitLocalPcapInputFormat extends FileInputFormat<LongWritable, ObjectWritable> {
     static final String READER_CLASS_PROPERTY = "net.ripe.hadoop.pcap.io.reader.class";
 
     public static final Log LOG = LogFactory.getLog(PcapInputFormat.class);
@@ -53,6 +55,8 @@ public class SplitablePcapInputFormat extends FileInputFormat<LongWritable, Obje
         if (codec != null)
             stream = new DataInputStream(codec.createInputStream(stream));
 
+//        long orig_start = start, orig_end = end;
+        
         PcapReader reader = initPcapReader(stream, conf); // reads the first 24 bytes of the file, even remotely
 
         // Determine the real start and end if this is splitable
@@ -61,7 +65,9 @@ public class SplitablePcapInputFormat extends FileInputFormat<LongWritable, Obje
         	boolean reversed = reader.isReverseHeaderByteOrder();
 
 			ByteOrder byteorder = reversed ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN;
-			BoundaryDetector detector = new PcapBoundaryDetector(stream, (int)snaplen, byteorder);
+			
+			RecordFormat format = new PcapRecordFormat((int)snaplen, byteorder);
+			RecordBoundaryDetector detector = new RecordBoundaryDetector(stream, format);
 
         	if (start == 0) {
         		start = 24L;
@@ -76,13 +82,16 @@ public class SplitablePcapInputFormat extends FileInputFormat<LongWritable, Obje
         	if (end != path.getFileSystem(conf).getFileStatus(path).getLen() - 1) {
             	// determine first unambiguous header index for NEXT split, remote read until that
         		baseStream.seek(end);
-        		end += detector.detect();
+        		end += detector.detect() - 1;
         	}
         }
         else {
         	start = 24L; // not 0, only effect is on progress though
         }
 
+//        if (true)
+//        throw new IOException("from IS start " + orig_start + ", end " + orig_end + ", determined start " + start + ", end " + end);
+        
         baseStream.seek(start);
         return new PcapRecordReader(reader, start, end, baseStream, stream, context);
     }

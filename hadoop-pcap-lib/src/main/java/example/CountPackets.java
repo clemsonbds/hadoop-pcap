@@ -18,7 +18,7 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
 import net.ripe.hadoop.pcap.io.PcapInputFormat;
-import net.ripe.hadoop.pcap.io.SplitablePcapInputFormat;
+import net.ripe.hadoop.pcap.io.SplitLocalPcapInputFormat;
 
 //import net.ripe.hadoop.pcap.io.PcapInputFormat;
 
